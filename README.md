@@ -1,20 +1,87 @@
-<div align="center">
-<img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
-</div>
+# 📘 مستند معماری و پیاده‌سازی MVP فین‌تک خرید و فروش طلای آب‌شده
 
-# Run and deploy your AI Studio app
+**نسخه ۱.۰ (دموی سرمایه‌پذیر + اجرای عملیاتی در محیط Frontend Mock)**  
+**تهیه‌شده برای:** مجید فرخانی  
+**تاریخ:** بهمن ۱۴۰۴
 
-This contains everything you need to run your app locally.
+این ریپو یک نسخه عملیاتی MVP (دمو) را پیاده‌سازی می‌کند که برای ارائه به سرمایه‌گذار، نمایش جریان کامل محصول، و اعتبارسنجی UX طراحی شده است.
 
-View your app in AI Studio: https://ai.studio/apps/drive/1QmrzpH5R2KSPPA9-MX0jR3zEBNaXXSDD
+## ویژگی‌های پیاده‌سازی‌شده در این نسخه
 
-## Run Locally
+- ورود کاربر و ادمین با نقش‌های جداگانه
+- کیف پول ریالی و طلایی
+- موتور خرید و فروش با کارمزد و کنترل موجودی
+- ثبت تراکنش با `referenceId` یکتا (idempotency)
+- ثبت لاگ حسابرسی (Audit Log)
+- شبیه‌ساز قیمت لحظه‌ای (هر ۳۰ ثانیه)
+- پنل ادمین برای خلاصه مالی سیستم
+- رابط کاربری فارسی و راست‌به‌چپ
 
-**Prerequisites:**  Node.js
+> توجه: این نسخه عمداً به صورت Frontend + LocalStorage پیاده شده تا MVP خیلی سریع قابل اجرا و نمایش باشد. در فاز بعدی، همین منطق به Next.js + Prisma + SQLite/PostgreSQL منتقل می‌شود.
 
+---
 
-1. Install dependencies:
-   `npm install`
-2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
-3. Run the app:
-   `npm run dev`
+## راه‌اندازی
+
+```bash
+npm install
+npm run dev
+```
+
+سپس برنامه روی `http://localhost:3000` بالا می‌آید.
+
+### حساب‌های پیش‌فرض
+
+- ادمین: `admin@goldapp.ir` / `Admin@12345`
+- کاربر: `user@goldapp.ir` / `User@12345`
+
+---
+
+## ساختار فنی پیاده‌سازی فعلی
+
+- `App.tsx`: لایه ارائه + جریان‌های اصلی محصول (ورود، خرید، فروش، داشبورد، پنل ادمین)
+- `services/dataStore.ts`: دیتابیس شبیه‌سازی‌شده، مدیریت نشست، ثبت تراکنش و لاگ
+- `services/tradeEngine.ts`: منطق مالی خرید/فروش، کارمزد، بررسی موجودی، idempotency
+- `types.ts`: مدل‌های داده‌ای (User/Wallet/Transaction/AuditLog/...)
+
+---
+
+## پیشنهادهای حرفه‌ای برای فاز Production
+
+### 1) معماری و مقیاس‌پذیری
+- مهاجرت به Next.js App Router + Server Actions
+- Prisma با SQLite در MVP سرور و مهاجرت به PostgreSQL بعد از جذب سرمایه
+- جداسازی `domain services` برای موتور معامله و حسابداری دوطرفه (Double-entry)
+
+### 2) امنیت
+- هش رمز با bcrypt(12)
+- OTP پیامکی + 2FA اجباری برای برداشت
+- Rate limiting روی مسیرهای auth/trade
+- IP intelligence و قفل برداشت بعد از تغییر IP
+- CSP/HSTS/X-Frame-Options و کوکی HttpOnly/Secure
+
+### 3) عملیات مالی و ریسک
+- مدل Ledger دوبل برای جلوگیری از خطای تراز
+- Queue برای سفارشات و اعمال تراکنش با idempotency key
+- Circuit breaker برای API قیمت و fallback چندمنبعی
+- مانیتورینگ لحظه‌ای موجودی خزانه ریال/طلا
+
+### 4) SEO و رشد
+- لندینگ SEO محور با صفحات: قیمت لحظه‌ای، آموزش سرمایه‌گذاری، سوالات متداول
+- اسکیما مارکاپ FAQ/Organization/FinancialService
+- محتوای خوشه‌ای (Cluster) برای کلمات: «خرید طلای آب‌شده»، «قیمت طلای لحظه‌ای»، «کارمزد خرید طلا»
+
+### 5) مدیریت پروژه
+- Roadmap چهارماهه مبتنی بر Milestone (Auth/Wallet → Trade Engine → Admin/Reports → QA/Launch)
+- KPI محصول: نرخ تبدیل ثبت‌نام، حجم معاملات روزانه، retention هفتگی
+- KPI فنی: خطای تراکنش، latency عملیات خرید/فروش، uptime
+
+---
+
+## محدودیت‌های نسخه دمو
+
+- بدون بک‌اند واقعی و بدون دیتابیس سروری
+- بدون درگاه پرداخت واقعی و KYC
+- بدون تست نفوذ و لاگ زیرساختی Production
+
+با این حال برای **دموی جذب سرمایه** و نمایش کامل تجربه محصول، نسخه فعلی قابل ارائه و قابل توسعه است.
